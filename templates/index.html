@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <title>Aplikasi Clustering Pelanggan Mall</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container mt-4">
+    <div class="header text-center mb-5">
+        <h2><i class="bi bi-graph-up-arrow"></i>Pengelompokan Pelanggan Berdasarkan Data Transaksi</h2>
+        <p class="lead">Aplikasi K-Means Clustering Pelanggan Mall</p>
+        <p class="lead">INTAN TELAUMBANUA (301230016) TEKNIK  INFORMATIKA</p>
+    </div>
+
+    <!-- Upload Form -->
+    <div class="card p-4 mb-5">
+        <form method="POST" action="/" enctype="multipart/form-data" onsubmit="return validateFileInput()" novalidate>
+            <div class="mb-3">
+                <label for="formFile" class="form-label">
+                    <i class="bi bi-file-earmark-arrow-up-fill"></i> <strong>Upload Dataset (.CSV)</strong>
+                </label>
+                <input class="form-control" type="file" id="formFile" name="file" accept=".csv" required onchange="updateFileName()">
+                <div id="fileError" class="text-danger mt-1"></div>
+                <small id="fileHelp" class="form-text text-muted"></small>
+            </div>
+            <div class="mb-3">
+                <label for="clusterCount" class="form-label">
+                    <i class="bi bi-diagram-3-fill"></i> <strong>Jumlah Cluster (K)</strong>
+                </label>
+                <input type="number" id="clusterCount" name="clusterCount" class="form-control"
+                       min="1" max="20" value="{{ clusterCount if clusterCount is defined else 3 }}" required>
+                <div class="form-text">Masukkan jumlah cluster (minimal 1, maksimal 20)</div>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-rocket-takeoff-fill"></i> Proses Clustering
+            </button>
+        </form>
+        {% if error %}
+        <div class="alert alert-danger mt-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> {{ error }}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="row">
+        {% if elbow_image %}
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card p-4 h-100">
+                    <h5><i class="bi bi-bar-chart-line-fill"></i> Metode Elbow untuk Menentukan K Optimal</h5>
+                    <img src="{{ url_for('static', filename='image/Elbow.png') }}" class="img-fluid rounded shadow-sm" alt="Elbow Plot" />
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card p-4 h-100">
+                    <h5><i class="bi bi-graph-up"></i> Silhouette Score untuk Menentukan K Optimal</h5>
+                    <img src="{{ url_for('static', filename='image/Silhouette.png') }}" class="img-fluid rounded shadow-sm" alt="Silhouette Plot" />
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card p-4 h-100">
+                    <h5><i class="bi bi-pie-chart-fill"></i> Hasil Clustering Pelanggan Mall</h5>
+                    <img src="{{ url_for('static', filename='image/Hasil.png') }}" class="img-fluid rounded shadow-sm" alt="Cluster Age vs Income" />
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card p-4 h-100">
+                    <h5><i class="bi bi-pie-chart-fill"></i> Clustering Usia & Skor Pengeluaran</h5>
+                    <img src="{{ url_for('static', filename='image/Clustering.png') }}" class="img-fluid rounded shadow-sm" alt="Cluster Age vs Spending" />
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if table %}
+        <div class="card p-4 mb-5">
+            <h5><i class="bi bi-table"></i> Tabel Data  Cluster</h5>
+            <div class="table-responsive">
+                {{ table|safe }}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if cluster_summary %}
+        <div class="card p-4 mb-5">
+            <h5><i class="bi bi-info-circle-fill"></i>Statistik Deskriptif Tiap Cluster</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead class="table-secondary">
+                        <tr>
+                            <th>Cluster</th>
+                            {% for key in cluster_summary[0].keys() if key != 'Cluster' %}
+                            <th>{{ key }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in cluster_summary %}
+                        <tr>
+                            <td>{{ row['Cluster'] }}</td>
+                            {% for key, val in row.items() if key != 'Cluster' %}
+                            <td>{{ "%.2f"|format(val) }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<footer>
+    &copy; 2025 | Aplikasi K-Means Clustering | Dibuat dengan Flask & Bootstrap
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
